@@ -1,20 +1,19 @@
 # vim: sta:et:sw=2:ts=2:sts=2
 # Written by Antonio Loquercio
+import pdb
 
 import numpy as np
 import scipy.stats as st
-import pdb
-
 import tensorflow as tf
 
 
 def layer(op):
     def layer_decorated(self, *args, **kwargs):
         # Automatically set a name if not provided.
-        name = kwargs.setdefault('name', self.get_unique_name(op.__name__))
+        name = kwargs.setdefault("name", self.get_unique_name(op.__name__))
         # Figure out the layer inputs.
         if len(self.terminals) == 0:
-            raise RuntimeError('No input variables found for layer %s.' % name)
+            raise RuntimeError("No input variables found for layer %s." % name)
         elif len(self.terminals) == 1:
             layer_input = self.terminals[0]
         else:
@@ -31,7 +30,7 @@ def layer(op):
     return layer_decorated
 
 
-class Smoother(object):
+class Smoother:
     def __init__(self, inputs, filter_size, sigma, heat_map_size=0):
         self.inputs = inputs
         self.terminals = []
@@ -42,11 +41,11 @@ class Smoother(object):
         self.setup()
 
     def setup(self):
-        self.feed('data').conv(name='smoothing')
+        self.feed("data").conv(name="smoothing")
 
     def get_unique_name(self, prefix):
         ident = sum(t.startswith(prefix) for t, _ in self.layers.items()) + 1
-        return '%s_%d' % (prefix, ident)
+        return "%s_%d" % (prefix, ident)
 
     def feed(self, *args):
         assert len(args) != 0
@@ -56,19 +55,19 @@ class Smoother(object):
                 try:
                     fed_layer = self.layers[fed_layer]
                 except KeyError:
-                    raise KeyError('Unknown layer name fed: %s' % fed_layer)
+                    raise KeyError("Unknown layer name fed: %s" % fed_layer)
             self.terminals.append(fed_layer)
         return self
 
     def gauss_kernel(self, kernlen=21, nsig=3, channels=1):
-        interval = (2*nsig+1.)/(kernlen)
-        x = np.linspace(-nsig-interval/2., nsig+interval/2., kernlen+1)
+        interval = (2 * nsig + 1.0) / (kernlen)
+        x = np.linspace(-nsig - interval / 2.0, nsig + interval / 2.0, kernlen + 1)
         kern1d = np.diff(st.norm.cdf(x))
         kernel_raw = np.sqrt(np.outer(kern1d, kern1d))
-        kernel = kernel_raw/kernel_raw.sum()
-        out_filter = np.array(kernel, dtype = np.float32)
+        kernel = kernel_raw / kernel_raw.sum()
+        out_filter = np.array(kernel, dtype=np.float32)
         out_filter = out_filter.reshape((kernlen, kernlen, 1, 1))
-        out_filter = np.repeat(out_filter, channels, axis = 2)
+        out_filter = np.repeat(out_filter, channels, axis=2)
         return out_filter
 
     def make_gauss_var(self, name, size, sigma, c_i):
@@ -78,22 +77,23 @@ class Smoother(object):
         return var
 
     def get_output(self):
-        '''Returns the smoother output.'''
+        """Returns the smoother output."""
         return self.terminals[-1]
 
     @layer
-    def conv(self,
-             input,
-             name,
-             padding='SAME'):
+    def conv(self, input, name, padding="SAME"):
         # Get the number of channels in the input
         if self.heat_map_size != 0:
-            c_i = self.heat_map_size 
+            c_i = self.heat_map_size
         else:
             c_i = input.get_shape().as_list()[3]
         # Convolution for a given input and kernel
-        convolve = lambda i, k: tf.nn.depthwise_conv2d(i, k, [1, 1, 1, 1], padding=padding)
+        convolve = lambda i, k: tf.nn.depthwise_conv2d(
+            i, k, [1, 1, 1, 1], padding=padding
+        )
         with tf.variable_scope(name) as scope:
-            kernel = self.make_gauss_var('gauss_weight', self.filter_size, self.sigma, c_i)
+            kernel = self.make_gauss_var(
+                "gauss_weight", self.filter_size, self.sigma, c_i
+            )
             output = convolve(input, kernel)
         return output

@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
+say() {
+ echo "$@" | sed \
+         -e "s/\(\(@\(red\|green\|yellow\|blue\|magenta\|cyan\|white\|reset\|b\|u\)\)\+\)[[]\{2\}\(.*\)[]]\{2\}/\1\4@reset/g" \
+         -e "s/@red/$(tput setaf 1)/g" \
+         -e "s/@green/$(tput setaf 2)/g" \
+         -e "s/@yellow/$(tput setaf 3)/g" \
+         -e "s/@blue/$(tput setaf 4)/g" \
+         -e "s/@magenta/$(tput setaf 5)/g" \
+         -e "s/@cyan/$(tput setaf 6)/g" \
+         -e "s/@white/$(tput setaf 7)/g" \
+         -e "s/@reset/$(tput sgr0)/g" \
+         -e "s/@b/$(tput bold)/g" \
+         -e "s/@u/$(tput sgr 0 1)/g"
+}
+
+say @blue[["Installing python dependencies"]]
+pip install -r requirements.txt
+
+say @blue[["Installing g++ and swig"]]
+sudo apt update && sudo apt install -y g++ swig
+
+say @blue[["Compiling paffprocess"]]
+cd tf_pose/pafprocess && \
+    swig -python -c++ pafprocess.i && \
+    python setup.py build_ext --inplace

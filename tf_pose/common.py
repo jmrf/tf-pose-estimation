@@ -1,7 +1,7 @@
 from enum import Enum
 
-import tensorflow as tf
 import cv2
+import tensorflow as tf
 
 
 regularizer_conv = 0.004
@@ -91,23 +91,60 @@ class MPIIPart(Enum):
                 pose_2d_mpii.append((0, 0))
                 visibilty.append(False)
                 continue
-            pose_2d_mpii.append((human.body_parts[coco.value].x, human.body_parts[coco.value].y))
+            pose_2d_mpii.append(
+                (human.body_parts[coco.value].x, human.body_parts[coco.value].y)
+            )
             visibilty.append(True)
         return pose_2d_mpii, visibilty
 
+
 CocoPairs = [
-    (1, 2), (1, 5), (2, 3), (3, 4), (5, 6), (6, 7), (1, 8), (8, 9), (9, 10), (1, 11),
-    (11, 12), (12, 13), (1, 0), (0, 14), (14, 16), (0, 15), (15, 17), (2, 16), (5, 17)
-]   # = 19
+    (1, 2),
+    (1, 5),
+    (2, 3),
+    (3, 4),
+    (5, 6),
+    (6, 7),
+    (1, 8),
+    (8, 9),
+    (9, 10),
+    (1, 11),
+    (11, 12),
+    (12, 13),
+    (1, 0),
+    (0, 14),
+    (14, 16),
+    (0, 15),
+    (15, 17),
+    (2, 16),
+    (5, 17),
+]  # = 19
 CocoPairsRender = CocoPairs[:-2]
 # CocoPairsNetwork = [
 #     (12, 13), (20, 21), (14, 15), (16, 17), (22, 23), (24, 25), (0, 1), (2, 3), (4, 5),
 #     (6, 7), (8, 9), (10, 11), (28, 29), (30, 31), (34, 35), (32, 33), (36, 37), (18, 19), (26, 27)
 #  ]  # = 19
 
-CocoColors = [[255, 0, 0], [255, 85, 0], [255, 170, 0], [255, 255, 0], [170, 255, 0], [85, 255, 0], [0, 255, 0],
-              [0, 255, 85], [0, 255, 170], [0, 255, 255], [0, 170, 255], [0, 85, 255], [0, 0, 255], [85, 0, 255],
-              [170, 0, 255], [255, 0, 255], [255, 0, 170], [255, 0, 85]]
+CocoColors = [
+    [255, 0, 0],
+    [255, 85, 0],
+    [255, 170, 0],
+    [255, 255, 0],
+    [170, 255, 0],
+    [85, 255, 0],
+    [0, 255, 0],
+    [0, 255, 85],
+    [0, 255, 170],
+    [0, 255, 255],
+    [0, 170, 255],
+    [0, 85, 255],
+    [0, 0, 255],
+    [85, 0, 255],
+    [170, 0, 255],
+    [255, 0, 255],
+    [255, 0, 170],
+    [255, 0, 85],
+]
 
 
 def read_imgfile(path, width=None, height=None):
@@ -119,23 +156,23 @@ def read_imgfile(path, width=None, height=None):
 
 def get_sample_images(w, h):
     val_image = [
-        read_imgfile('./images/p1.jpg', w, h),
-        read_imgfile('./images/p2.jpg', w, h),
-        read_imgfile('./images/p3.jpg', w, h),
-        read_imgfile('./images/golf.jpg', w, h),
-        read_imgfile('./images/hand1.jpg', w, h),
-        read_imgfile('./images/hand2.jpg', w, h),
-        read_imgfile('./images/apink1_crop.jpg', w, h),
-        read_imgfile('./images/ski.jpg', w, h),
-        read_imgfile('./images/apink2.jpg', w, h),
-        read_imgfile('./images/apink3.jpg', w, h),
-        read_imgfile('./images/handsup1.jpg', w, h),
-        read_imgfile('./images/p3_dance.png', w, h),
+        read_imgfile("./images/p1.jpg", w, h),
+        read_imgfile("./images/p2.jpg", w, h),
+        read_imgfile("./images/p3.jpg", w, h),
+        read_imgfile("./images/golf.jpg", w, h),
+        read_imgfile("./images/hand1.jpg", w, h),
+        read_imgfile("./images/hand2.jpg", w, h),
+        read_imgfile("./images/apink1_crop.jpg", w, h),
+        read_imgfile("./images/ski.jpg", w, h),
+        read_imgfile("./images/apink2.jpg", w, h),
+        read_imgfile("./images/apink3.jpg", w, h),
+        read_imgfile("./images/handsup1.jpg", w, h),
+        read_imgfile("./images/p3_dance.png", w, h),
     ]
     return val_image
 
 
 def to_str(s):
     if not isinstance(s, str):
-        return s.decode('utf-8')
+        return s.decode("utf-8")
     return s
